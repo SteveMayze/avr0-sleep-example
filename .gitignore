@@ -50,3 +50,9 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+/avr0-sleep.X/build/
+/avr0-sleep.X/dist/
+
+.DS_Store
+avr0-sleep.X/.generated_files/
+
