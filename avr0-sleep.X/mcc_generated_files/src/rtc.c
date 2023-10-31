@@ -51,28 +51,28 @@ int8_t RTC_Initialize()
     while (RTC.STATUS > 0) { /* Wait for all register to be synchronized */
     }
     //Compare 
-    RTC.CMP = 0x927B;
+    RTC.CMP = 0x09;
 
     //Count
     RTC.CNT = 0x00;
 
     //Period
-    RTC.PER = 0x01;
+    RTC.PER = 0x00;
 
     //Clock selection
-    RTC.CLKSEL = 0x00;
+    RTC.CLKSEL = 0x01;
 
     //CMP disabled; OVF disabled; 
     RTC.INTCTRL = 0x00;
 
-    //RUNSTDBY disabled; PRESCALER DIV256; CORREN disabled; RTCEN enabled; 
-    RTC.CTRLA = 0x41;
     
     while (RTC.PITSTATUS > 0) { /* Wait for all register to be synchronized */
     }
     //PI disabled; 
     RTC.PITINTCTRL = 0x00;
         
+    //PERIOD CYC8192; PITEN enabled; 
+    RTC.PITCTRLA = 0x61;
      
     return 0;
 }

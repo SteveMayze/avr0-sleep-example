@@ -20,18 +20,31 @@
     OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS 
     SOFTWARE.
 */
-
+#define F_CPU 20000000UL
 #include "mcc_generated_files/mcc.h"
-#include "mcc_generated_files/include/rtc.h"
-#include "mcc_generated_files/include/pin_manager.h"
 #include <avr/sleep.h>
 
-void tick(void)
+#define LOGGER_LEVEL_OFF 0
+#define LOGGER_LEVEL_ERROR 1
+#define LOGGER_LEVEL_INFO 2
+#define LOGGER_LEVEL_DEBUG 4
+#define LOGGER_LEVEL_ALL 7
+
+#define LOGGER_LEVEL LOGGER_LEVEL_ALL 
+
+
+#include "logger.h"
+
+#include <util/delay.h>
+bool tick;
+
+void pit_cb(void)
 {
     /* Clear flag by writing '1': */
     RTC.PITINTFLAGS = RTC_PI_bm;
-    
-    LED_Toggle();
+    LOG_INFO("TICK \n");
+
+    tick = true;
 }
 
 /*
@@ -39,32 +52,43 @@ void tick(void)
 */
 int main(void)
 {
-    RTC_SetPITIsrCallback( tick );
+    SYSTEM_Initialize();
+    sleep_disable();
 
-    // LED_init();
-    RTC_Initialize();
-    SLPCTRL_Initialize();
+    LOG_INFO("Starting \n");
     
+    RTC_SetPITIsrCallback( pit_cb );
+
+    _delay_ms(1000);
+
     /* Enable Global Interrupts */
     sei();
-    
+    RTC_EnablePITInterrupt();
     while (1) 
     {
-        /* Put the CPU in sleep */
-        sleep_cpu();
         
-        /* The PIT interrupt will wake the CPU */
+        /* Put the CPU in sleep */
+        for(uint8_t i = 0; i < 4; i++){
+            sleep_mode();
+//            {
+//                RTC_DisablePITInterrupt();
+//                LOG_INFO("   peek %d \n", i);
+//                RTC_EnablePITInterrupt();
+//            };
+        }
+        
+        LOG_INFO("Waking \n");
+        
+        if (tick){
+            RTC_DisablePITInterrupt();
+            LOG_INFO(">> TOCK \n");
+            LED_Toggle();
+            tick = false;
+            _delay_ms(5000);
+            RTC_EnablePITInterrupt();
+        }    
     }
-    
-    
-//    /* Initializes MCU, drivers and middle ware */
-//    SYSTEM_Initialize();
-//
-//    /* Replace with your application code */
-//    while (1){
-//        
-//        
-//    }
+
 }
 /**
     End of File
